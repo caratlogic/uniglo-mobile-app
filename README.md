@@ -53,3 +53,4 @@ to build
 $ eas build --platform android --profile preview
 eas submit --platform ios
 eas build --platform ios --profile production
+hello
