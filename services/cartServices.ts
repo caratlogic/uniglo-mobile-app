@@ -12,11 +12,21 @@ export interface ApiErrorResponse {
     message: string;
 }
 
+// The cart API mixes two item shapes in `items`: diamond items carry
+// diamondId/diamond, melee items carry melleId/melle (added from the web app).
 export interface CartItem {
-    diamondId: string;
-    diamond: Diamond;
+    diamondId?: string;
+    diamond?: Diamond;
+    melleId?: string;
+    melle?: Record<string, unknown>;
     addedAt: string;
+    status?: string;
 }
+
+export type DiamondCartItem = CartItem & { diamondId: string; diamond: Diamond };
+
+export const isDiamondCartItem = (item: CartItem): item is DiamondCartItem =>
+    Boolean(item?.diamond?._id);
 
 export interface Cart {
     _id: string;

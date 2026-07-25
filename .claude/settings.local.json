@@ -11,7 +11,14 @@
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
       "Bash(find D:Projectsuniglow-frontend -type f \\\\\\(-name *route* -o -path */api/* \\\\\\))",
       "Bash(find D:ProjectsUniglo -type f \\\\\\(-name *.ts -o -name *.js \\\\\\) -path *diamond*)",
-      "Bash(find D:Projectsuniglow-frontend -name .env* -o -name *.env*)"
+      "Bash(find D:Projectsuniglow-frontend -name .env* -o -name *.env*)",
+      "Bash(eas --version)",
+      "Bash(eas whoami *)",
+      "Bash(npx expo *)",
+      "Bash(export EAS_NO_VPN_WARNING=1)",
+      "Bash(echo \"===all branches===\")",
+      "Bash(eas branch:list --non-interactive)",
+      "Bash(eas channel:list --non-interactive)"
     ],
     "additionalDirectories": [
       "D:\\Projects\\uniglow-frontend"

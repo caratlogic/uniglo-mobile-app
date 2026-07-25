@@ -2,10 +2,11 @@ import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton"
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/context/AuthContext";
 import {
-    CartItem,
     clearCart,
+    DiamondCartItem,
     getCart,
     holdDiamond,
+    isDiamondCartItem,
     removeFromCart,
 } from "@/services/cartServices";
 import { Diamond } from "@/services/diamondService";
@@ -155,7 +156,7 @@ function CartDiamondCard({ diamond }: { diamond: Diamond }) {
 // ── Swipeable Card ────────────────────────────────────────────────────────────
 
 interface SwipeableCartCardProps {
-    item: CartItem;
+    item: DiamondCartItem;
     onRemove: () => void;
     actionLoading: boolean;
     isSelected: boolean;
@@ -307,7 +308,8 @@ function SwipeableCartCard({
 
 export default function CartScreen() {
     const { isAuthenticated } = useAuth();
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [cartItems, setCartItems] = useState<DiamondCartItem[]>([]);
+    const [meleeCount, setMeleeCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
@@ -322,7 +324,10 @@ export default function CartScreen() {
         try {
             const res = await getCart();
             if (res.success) {
-                setCartItems(res.data.cart?.items ?? []);
+                const items = res.data.cart?.items ?? [];
+                const diamondItems = items.filter(isDiamondCartItem);
+                setCartItems(diamondItems);
+                setMeleeCount(items.length - diamondItems.length);
             }
         } catch (err: any) {
             Alert.alert("Error", err?.toString() ?? "Failed to load cart");
@@ -571,11 +576,14 @@ export default function CartScreen() {
                                 color="#d1d5db"
                             />
                             <Text className="text-lg font-latoBold text-gray-400">
-                                Your cart is empty
+                                {meleeCount > 0
+                                    ? "No diamonds in your cart"
+                                    : "Your cart is empty"}
                             </Text>
                             <Text className="text-sm font-lato text-gray-400 text-center">
-                                Browse our inventory and add diamonds to your
-                                cart.
+                                {meleeCount > 0
+                                    ? `${meleeCount} melee item${meleeCount > 1 ? "s" : ""} in your cart can be managed on the Uniglo website.`
+                                    : "Browse our inventory and add diamonds to your cart."}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => router.push("/(tabs)/inventory")}
@@ -588,6 +596,15 @@ export default function CartScreen() {
                         </View>
                     ) : (
                         <>
+                            {meleeCount > 0 && (
+                                <View className="px-4 py-2 bg-amber-50 border-b border-amber-200">
+                                    <Text className="text-xs font-lato text-amber-700 text-center">
+                                        {meleeCount} melee item
+                                        {meleeCount > 1 ? "s" : ""} in your cart
+                                        can be managed on the Uniglo website.
+                                    </Text>
+                                </View>
+                            )}
                             {!selectionMode && cartItems.length > 0 && (
                                 <View className="px-4 py-2 bg-gray-100">
                                     <Text className="text-xs font-lato text-gray-500 text-center">
@@ -597,7 +614,9 @@ export default function CartScreen() {
                             )}
                             <FlatList
                                 data={cartItems}
-                                keyExtractor={(item) => item.diamondId}
+                                keyExtractor={(item) =>
+                                    item.diamondId ?? item.diamond._id
+                                }
                                 contentContainerStyle={{ padding: 16 }}
                                 refreshControl={
                                     <RefreshControl

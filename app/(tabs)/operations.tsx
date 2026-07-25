@@ -1,7 +1,11 @@
 import { DiamondCard } from "@/components/inventory/DiamondCard";
 import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton";
 import { useAuth } from "@/context/AuthContext";
-import { CartItem, getHoldItems } from "@/services/cartServices";
+import {
+    DiamondCartItem,
+    getHoldItems,
+    isDiamondCartItem,
+} from "@/services/cartServices";
 import { getUserQueries, InquiryQuery } from "@/services/inquiryServices";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
@@ -211,7 +215,7 @@ export default function OperationsScreen() {
     const [activeTab, setActiveTab] = useState<Tab>("hold");
 
     // Hold stones state
-    const [holdItems, setHoldItems] = useState<CartItem[]>([]);
+    const [holdItems, setHoldItems] = useState<DiamondCartItem[]>([]);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -230,7 +234,9 @@ export default function OperationsScreen() {
         try {
             const res = await getHoldItems();
             if (res.success) {
-                setHoldItems(res.data.holdItems ?? []);
+                setHoldItems(
+                    (res.data.holdItems ?? []).filter(isDiamondCartItem),
+                );
                 setTotalItems(res.data.totalItems ?? 0);
             }
         } catch (err: any) {
@@ -319,7 +325,9 @@ export default function OperationsScreen() {
 
                 <FlatList
                     data={holdItems}
-                    keyExtractor={(item) => item.diamondId}
+                    keyExtractor={(item) =>
+                        item.diamondId ?? item.diamond._id
+                    }
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingBottom: 16,
